@@ -12,8 +12,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from correct path
+// Serve static files - FIXED PATH
 app.use(express.static(path.join(__dirname, 'frontend')));
+
+// Fallback route - serve index.html for all other routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
 
 const USERS_FILE = path.join(__dirname, 'users.json');
 const CONTACT_FILE = path.join(__dirname, 'contacts.json');
@@ -47,7 +52,6 @@ app.post('/api/login', (req, res) => {
 // -------- READINGS --------
 app.get('/api/readings', async (req, res) => {
     try {
-        // Replace V1-V5 with your actual Blynk virtual pins
         const voltage = await axios.get(`${BLYNK_BASE}&v1`);
         const current = await axios.get(`${BLYNK_BASE}&v2`);
         const power = await axios.get(`${BLYNK_BASE}&v3`);
