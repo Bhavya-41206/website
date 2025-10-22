@@ -8,11 +8,13 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    const res = await fetch('http://localhost:3000/api/login', {
+    // ✅ FIXED: Remove localhost, use relative path
+    const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     });
+    
     const data = await res.json();
     if(data.success){
         document.body.innerHTML = `<h2 style="text-align:center;margin-top:40%;">Logging in...</h2>`;
