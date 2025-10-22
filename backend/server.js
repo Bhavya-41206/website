@@ -12,12 +12,21 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files - FIXED PATH
+// Serve static files from frontend folder
 app.use(express.static(path.join(__dirname, 'frontend')));
 
-// Fallback route - serve index.html for all other routes
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+// Redirect root route to login page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'login.html'));
+});
+
+// Serve other HTML files explicitly
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'dashboard.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'login.html'));
 });
 
 const USERS_FILE = path.join(__dirname, 'users.json');
