@@ -2,30 +2,42 @@ const express = require('express');
 const fs = require('fs');
 const axios = require('axios');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const path = require('path');
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+const PORT = process.env.PORT || 3000;
 
-const USERS_FILE = './users.json';
-const CONTACT_FILE = './contacts.json';
-const BLYNK_TOKEN = 'ukiSbVaUr-3h2-Sorur2JGiXxQ6LBMct'; // Replace with your Blynk token
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from correct path
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+const USERS_FILE = path.join(__dirname, 'users.json');
+const CONTACT_FILE = path.join(__dirname, 'contacts.json');
+const BLYNK_TOKEN = 'ukiSbVaUr-3h2-Sorur2JGiXxQ6LBMct';
 const BLYNK_BASE = `https://blynk.cloud/external/api/get?token=${BLYNK_TOKEN}`;
 
 // Load users
-let users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+let users = [];
+try {
+    users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+} catch (err) {
+    console.error('Error loading users:', err);
+}
 
 // Load contacts (create file if it doesn't exist)
-if(!fs.existsSync(CONTACT_FILE)) fs.writeFileSync(CONTACT_FILE, JSON.stringify([]));
+if (!fs.existsSync(CONTACT_FILE)) {
+    fs.writeFileSync(CONTACT_FILE, JSON.stringify([]));
+}
 
 // -------- LOGIN --------
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const user = users.find(u => u.username === username && u.password === password);
-    if(user) {
+    if (user) {
         res.json({ success: true });
     } else {
         res.json({ success: false, message: "Invalid credentials" });
@@ -49,7 +61,7 @@ app.get('/api/readings', async (req, res) => {
             energy: energy.data,
             theftDetected: theft.data === 1
         });
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch readings from Blynk' });
     }
@@ -58,14 +70,20 @@ app.get('/api/readings', async (req, res) => {
 // -------- CONTACT FORM --------
 app.post('/api/contact', (req, res) => {
     const { username, message } = req.body;
-    if(!username || !message) return res.status(400).json({ success: false, message: "Missing fields" });
+    if (!username || !message) return res.status(400).json({ success: false, message: "Missing fields" });
 
-    const contacts = JSON.parse(fs.readFileSync(CONTACT_FILE, 'utf-8'));
-    contacts.push({ username, message, time: new Date().toISOString() });
-    fs.writeFileSync(CONTACT_FILE, JSON.stringify(contacts, null, 2));
-
-    res.json({ success: true, message: "Message sent successfully" });
+    try {
+        const contacts = JSON.parse(fs.readFileSync(CONTACT_FILE, 'utf-8'));
+        contacts.push({ username, message, time: new Date().toISOString() });
+        fs.writeFileSync(CONTACT_FILE, JSON.stringify(contacts, null, 2));
+        res.json({ success: true, message: "Message sent successfully" });
+    } catch (err) {
+        console.error('Contact form error:', err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
 });
 
 // -------- START SERVER --------
-app.listen(3000, () => console.log('Backend running on http://localhost:3000'));
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Backend running on port ${PORT}`);
+});
