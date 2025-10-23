@@ -149,4 +149,122 @@ body.dark { background: #121212; color: #fff; transition: 0.3s;}
 /* Contact page */
 textarea { width: 90%; height: 100px; margin: 1rem auto; display: block; border-radius: 8px; padding: 12px; }
 button#sendMsg { display: block; margin: 0 auto; padding: 10px 20px; border-radius: 8px; border: none; background: #4CAF50; color: #fff; cursor: pointer; }
+/* Updated Header Layout */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: var(--card-bg);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-left h1 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.5rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Improved Logout Button */
+.logout-btn {
+    padding: 0.8rem 1.5rem;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+}
+
+.logout-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+}
+
+/* Theme Toggle - Moved to left */
+.theme-toggle {
+    margin-right: auto;
+}
+
+.theme-toggle button {
+    padding: 0.8rem;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle button:hover {
+    transform: scale(1.1);
+    background: var(--hover-color);
+}
+
+/* Tooltip styles */
+.nav-card, .theme-toggle button, .logout-btn {
+    position: relative;
+}
+
+.nav-card:hover::after, 
+.theme-toggle button:hover::after,
+.logout-btn:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+/* Active Nav Card */
+.nav-card.active {
+    border: 2px solid #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+}
+
+/* Cost Box */
+.reading-box.cost {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    font-weight: 600;
+}
+
+/* Theft Alert */
+.reading-box.alert {
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
+    animation: pulse 1.5s infinite;
+    color: white;
+    font-weight: 600;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
 
