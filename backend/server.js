@@ -58,6 +58,28 @@ app.post('/api/login', (req, res) => {
     }
 });
 
+// -------- RECEIVE DATA FROM ESP32 --------
+app.post('/api/energy-data', (req, res) => {
+    try {
+        const data = req.body;
+        
+        console.log('Received data from ESP32:', data);
+        
+        // You can store this data or process it as needed
+        res.json({ 
+            success: true, 
+            message: 'Data received successfully',
+            receivedAt: new Date().toISOString()
+        });
+    } catch (err) {
+        console.error('Error processing ESP32 data:', err);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error processing data' 
+        });
+    }
+});
+
 // -------- READINGS --------
 app.get('/api/readings', async (req, res) => {
     try {
