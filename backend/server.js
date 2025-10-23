@@ -58,47 +58,47 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// -------- RECEIVE DATA FROM ESP32 --------
-app.post('/api/energy-data', (req, res) => {
-    try {
-        const data = req.body;
-        
-        console.log('Received data from ESP32:', data);
-        
-        // You can store this data or process it as needed
-        res.json({ 
-            success: true, 
-            message: 'Data received successfully',
-            receivedAt: new Date().toISOString()
-        });
-    } catch (err) {
-        console.error('Error processing ESP32 data:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error processing data' 
-        });
-    }
-});
-
 // -------- READINGS --------
 app.get('/api/readings', async (req, res) => {
     try {
-        const voltage = await axios.get(`${BLYNK_BASE}&v1`);
-        const current = await axios.get(`${BLYNK_BASE}&v2`);
-        const power = await axios.get(`${BLYNK_BASE}&v3`);
-        const energy = await axios.get(`${BLYNK_BASE}&v4`);
-        const theft = await axios.get(`${BLYNK_BASE}&v5`);
+        // FIXED: Match ESP32 virtual pins - V0, V1, V2, V3
+        const voltage = await axios.get(`${BLYNK_BASE}&v0`);  // ESP32 uses V0 for voltage
+        const current = await axios.get(`${BLYNK_BASE}&v1`);  // ESP32 uses V1 for current
+        const power = await axios.get(`${BLYNK_BASE}&v2`);    // ESP32 uses V2 for power
+        const energy = await axios.get(`${BLYNK_BASE}&v3`);   // ESP32 uses V3 for energy
+        // ESP32 uses V4 for cost, not theft detection
 
         res.json({
             voltage: voltage.data,
             current: current.data,
             power: power.data,
             energy: energy.data,
-            theftDetected: theft.data === 1
+            theftDetected: false  // Can't get theft from Blynk with current setup
         });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch readings from Blynk' });
+    }
+});
+
+// -------- DEBUG ENDPOINT --------
+app.get('/api/debug-blynk', async (req, res) => {
+    try {
+        const v0 = await axios.get(`${BLYNK_BASE}&v0`);
+        const v1 = await axios.get(`${BLYNK_BASE}&v1`);
+        const v2 = await axios.get(`${BLYNK_BASE}&v2`);
+        const v3 = await axios.get(`${BLYNK_BASE}&v3`);
+        const v4 = await axios.get(`${BLYNK_BASE}&v4`);
+
+        res.json({
+            v0_voltage: v0.data,
+            v1_current: v1.data,
+            v2_power: v2.data,
+            v3_energy: v3.data,
+            v4_cost: v4.data
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
