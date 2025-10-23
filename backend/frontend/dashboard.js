@@ -1,21 +1,19 @@
-// Theme toggle - moved to left
+// Theme toggle
 const toggleBtn = document.getElementById('toggleTheme');
 toggleBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark');
     document.body.classList.toggle('light');
-    // Update button icon based on theme
     toggleBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
 });
 
-// Logout functionality
+// Simple logout - just redirect to login
 document.getElementById('logoutBtn').addEventListener('click', function() {
     if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('isLoggedIn');
         window.location.href = 'login.html';
     }
 });
 
-// Add tooltips to navigation cards
+// Add tooltips
 document.querySelectorAll('.nav-card').forEach(card => {
     card.addEventListener('mouseenter', function() {
         const tooltip = this.querySelector('p').textContent;
@@ -23,70 +21,61 @@ document.querySelectorAll('.nav-card').forEach(card => {
     });
 });
 
-// Add tooltip to theme toggle
-toggleBtn.addEventListener('mouseenter', function() {
-    this.setAttribute('title', 'Toggle Theme');
-});
+toggleBtn.setAttribute('title', 'Toggle Theme');
+document.getElementById('logoutBtn').setAttribute('title', 'Logout');
 
-// Add tooltip to logout button
-document.getElementById('logoutBtn').addEventListener('mouseenter', function() {
-    this.setAttribute('title', 'Logout');
-});
-
-// Page switching
-function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-    document.getElementById(id).style.display = 'block';
+// Page switching - SIMPLIFIED
+function showPage(pageId) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+    
+    // Show the selected page
+    document.getElementById(pageId).style.display = 'block';
     
     // Update active nav card
     document.querySelectorAll('.nav-card').forEach(card => {
         card.classList.remove('active');
     });
-    // Find the clicked nav card and add active class
     event.currentTarget.classList.add('active');
 }
 
-// Show home on load
+// Show home page by default when page loads
 window.addEventListener('load', function() {
-    // Check authentication first
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    
-    if (!isLoggedIn) {
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    // Then show home page
-    showPage('home');
-    
-    // Initialize first nav card as active
+    document.getElementById('home').style.display = 'block';
+    // Set first nav card as active
     document.querySelector('.nav-card').classList.add('active');
 });
 
 // Chart setup
-let ctx = document.getElementById('chart').getContext('2d');
-let chart = new Chart(ctx, {
-    type: 'line',
-    data: { 
-        labels: [], 
-        datasets: [
-            { label: 'Voltage', data: [], borderColor: 'yellow', fill: false },
-            { label: 'Current', data: [], borderColor: 'blue', fill: false },
-            { label: 'Power', data: [], borderColor: 'green', fill: false },
-            { label: 'Energy', data: [], borderColor: 'orange', fill: false },
-        ]
-    },
-    options: { 
-        responsive: true, 
-        interaction: { mode: 'index', intersect: false }, 
-        scales: { 
-            x: { 
-                display: true, 
-                title: { display: true, text: 'Time' } 
-            } 
-        } 
+let chart = null;
+
+// Initialize chart when graph page is shown
+function initChart() {
+    const ctx = document.getElementById('chart').getContext('2d');
+    if (chart) {
+        chart.destroy();
     }
-});
+    
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: { 
+            labels: [], 
+            datasets: [
+                { label: 'Voltage', data: [], borderColor: '#FFD700', fill: false },
+                { label: 'Current', data: [], borderColor: '#007BFF', fill: false },
+                { label: 'Power', data: [], borderColor: '#28A745', fill: false },
+                { label: 'Energy', data: [], borderColor: '#FD7E14', fill: false },
+            ]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false }
+        }
+    });
+}
 
 // Fetch readings from backend
 async function fetchReadings() {
@@ -94,47 +83,49 @@ async function fetchReadings() {
         const res = await fetch('/api/readings');
         const data = await res.json();
         
-        document.getElementById('voltage').querySelector('span').innerText = `Voltage: ${data.voltage} V`;
-        document.getElementById('current').querySelector('span').innerText = `Current: ${data.current} A`;
-        document.getElementById('power').querySelector('span').innerText = `Power: ${data.power} W`;
-        document.getElementById('energy').querySelector('span').innerText = `Energy: ${data.energy} Wh`;
+        console.log('Data received:', data); // Debug log
+        
+        // Update readings
+        document.getElementById('voltage').querySelector('span').textContent = `Voltage: ${data.voltage || 0} V`;
+        document.getElementById('current').querySelector('span').textContent = `Current: ${data.current || 0} A`;
+        document.getElementById('power').querySelector('span').textContent = `Power: ${data.power || 0} W`;
+        document.getElementById('energy').querySelector('span').textContent = `Energy: ${data.energy || 0} Wh`;
 
-        // Calculate and display cost (₹6.5 per kWh)
-        const energyKwh = data.energy / 1000; // Convert Wh to kWh
+        // Calculate and display cost
+        const energyKwh = (data.energy || 0) / 1000;
         const cost = (energyKwh * 6.5).toFixed(2);
-        document.getElementById('cost').querySelector('span').innerText = `Cost: ₹${cost}`;
+        document.getElementById('cost').querySelector('span').textContent = `Cost: ₹${cost}`;
 
+        // Update theft detection
         const theftBox = document.getElementById('theft');
-        theftBox.querySelector('span').innerText = `Theft Detected: ${data.theftDetected ? 'YES' : 'NO'}`;
-        theftBox.classList.toggle('alert', data.theftDetected);
+        const isTheft = data.theftDetected || false;
+        theftBox.querySelector('span').textContent = `Theft Detected: ${isTheft ? 'YES' : 'NO'}`;
+        theftBox.classList.toggle('alert', isTheft);
 
-        // Update chart
-        const time = new Date().toLocaleTimeString();
-        if(chart.data.labels.length > 10){
-            chart.data.labels.shift();
-            chart.data.datasets.forEach(ds => ds.data.shift());
+        // Update chart if it exists
+        if (chart) {
+            const time = new Date().toLocaleTimeString();
+            if (chart.data.labels.length > 10) {
+                chart.data.labels.shift();
+                chart.data.datasets.forEach(ds => ds.data.shift());
+            }
+            chart.data.labels.push(time);
+            chart.data.datasets[0].data.push(data.voltage || 0);
+            chart.data.datasets[1].data.push(data.current || 0);
+            chart.data.datasets[2].data.push(data.power || 0);
+            chart.data.datasets[3].data.push(data.energy || 0);
+            chart.update();
         }
-        chart.data.labels.push(time);
-        chart.data.datasets[0].data.push(data.voltage);
-        chart.data.datasets[1].data.push(data.current);
-        chart.data.datasets[2].data.push(data.power);
-        chart.data.datasets[3].data.push(data.energy);
-        chart.update();
-    } catch(err) { 
-        console.error('Error fetching readings:', err); 
+    } catch (error) { 
+        console.error('Error fetching readings:', error);
     }
 }
-
-// Start fetching readings
-setInterval(fetchReadings, 3000);
-fetchReadings();
 
 // Contact form
 document.getElementById('sendMsg').addEventListener('click', async () => {
     const message = document.querySelector('#contact textarea').value;
-    const username = "User";
     
-    if(!message) {
+    if (!message) {
         alert("Please write a message.");
         return;
     }
@@ -143,18 +134,29 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
         const res = await fetch('/api/contact', {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ username, message })
+            body: JSON.stringify({ username: "User", message })
         });
         
         const data = await res.json();
-        if(data.success){
+        if (data.success) {
             alert("Message sent to Government!");
             document.querySelector('#contact textarea').value = '';
         } else {
-            alert("Failed to send message.");
+            alert("Failed to send message: " + (data.message || "Unknown error"));
         }
-    } catch(error) {
+    } catch (error) {
         console.error('Error sending message:', error);
-        alert("Error sending message.");
+        alert("Error sending message. Please try again.");
     }
 });
+
+// Initialize chart when graph page is shown
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.nav-card') && e.target.closest('.nav-card').querySelector('p').textContent === 'Graph') {
+        setTimeout(initChart, 100);
+    }
+});
+
+// Start fetching readings
+setInterval(fetchReadings, 3000);
+fetchReadings(); // Initial fetch
