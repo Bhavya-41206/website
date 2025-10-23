@@ -8,7 +8,7 @@ toggleBtn.addEventListener('click', () => {
 // Login functionality
 document.getElementById('loginBtn').addEventListener('click', async () => {
     const username = document.getElementById('username').value;
-    const password = document.getElementById('password').
+    const password = document.getElementById('password').value; // ✅ FIXED: Added .value
 
     // ✅ FIXED: Remove localhost, use relative path
     const res = await fetch('/api/login', {
@@ -25,4 +25,3 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
         document.getElementById('errorMsg').innerText = data.message;
     }
 });
-
