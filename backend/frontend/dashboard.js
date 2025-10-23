@@ -34,6 +34,11 @@ function showPage(pageId) {
     // Show the selected page
     document.getElementById(pageId).style.display = 'block';
     
+    // If showing graph page, initialize chart
+    if (pageId === 'graph') {
+        setTimeout(initChart, 100);
+    }
+    
     // Update active nav card
     document.querySelectorAll('.nav-card').forEach(card => {
         card.classList.remove('active');
@@ -63,16 +68,98 @@ function initChart() {
         data: { 
             labels: [], 
             datasets: [
-                { label: 'Voltage', data: [], borderColor: '#FFD700', fill: false },
-                { label: 'Current', data: [], borderColor: '#007BFF', fill: false },
-                { label: 'Power', data: [], borderColor: '#28A745', fill: false },
-                { label: 'Energy', data: [], borderColor: '#FD7E14', fill: false },
+                { 
+                    label: 'Voltage (V)', 
+                    data: [], 
+                    borderColor: '#FFD700', 
+                    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                },
+                { 
+                    label: 'Current (A)', 
+                    data: [], 
+                    borderColor: '#007BFF', 
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                },
+                { 
+                    label: 'Power (W)', 
+                    data: [], 
+                    borderColor: '#28A745', 
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                },
+                { 
+                    label: 'Energy (Wh)', 
+                    data: [], 
+                    borderColor: '#FD7E14', 
+                    backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                },
             ]
         },
         options: { 
-            responsive: true, 
+            responsive: true,
             maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false }
+            interaction: { 
+                mode: 'index', 
+                intersect: false 
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Real-time Energy Monitoring',
+                    font: {
+                        size: 18
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: { 
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Time',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Values',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    beginAtZero: true
+                }
+            },
+            animation: {
+                duration: 0 // Disable animation for real-time updates
+            }
         }
     });
 }
@@ -105,7 +192,7 @@ async function fetchReadings() {
         // Update chart if it exists
         if (chart) {
             const time = new Date().toLocaleTimeString();
-            if (chart.data.labels.length > 10) {
+            if (chart.data.labels.length > 20) {
                 chart.data.labels.shift();
                 chart.data.datasets.forEach(ds => ds.data.shift());
             }
@@ -114,7 +201,7 @@ async function fetchReadings() {
             chart.data.datasets[1].data.push(data.current || 0);
             chart.data.datasets[2].data.push(data.power || 0);
             chart.data.datasets[3].data.push(data.energy || 0);
-            chart.update();
+            chart.update('none'); // Update without animation for performance
         }
     } catch (error) { 
         console.error('Error fetching readings:', error);
@@ -147,13 +234,6 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
     } catch (error) {
         console.error('Error sending message:', error);
         alert("Error sending message. Please try again.");
-    }
-});
-
-// Initialize chart when graph page is shown
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.nav-card') && e.target.closest('.nav-card').querySelector('p').textContent === 'Graph') {
-        setTimeout(initChart, 100);
     }
 });
 
