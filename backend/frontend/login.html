@@ -3,72 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Energy Portal Dashboard</title>
+<title>Smart Energy Portal - Login</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="light">
 
-<!-- Header with theme toggle and logout -->
-<header class="dashboard-header">
-    <div class="header-left">
-        <h1>Smart Energy Portal</h1>
-    </div>
-    <div class="header-right">
-        <div class="theme-toggle">
-            <button id="toggleTheme">🌙</button>
-        </div>
-        <button id="logoutBtn" class="logout-btn">Logout</button>
-    </div>
-</header>
+<!-- Theme toggle -->
+<div class="theme-toggle">
+    <button id="toggleTheme">🌙</button>
+</div>
 
-<!-- Navigation cards -->
-<section class="nav-cards">
-    <div class="nav-card" onclick="showPage('home')">
-        <img src="https://img.icons8.com/fluency/48/000000/home.png" alt="Home">
-        <p>Home</p>
+<div class="login-wrapper">
+    <div class="login-box">
+        <h2>Smart Energy Portal</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn">Login</button>
+        <p id="errorMsg" class="error"></p>
+        <a href="#">Forgot Password?</a>
     </div>
-    <div class="nav-card" onclick="showPage('graph')">
-        <img src="https://img.icons8.com/fluency/48/000000/combo-chart.png" alt="Graph">
-        <p>Graph</p>
-    </div>
-    <div class="nav-card" onclick="showPage('contact')">
-        <img src="https://img.icons8.com/fluency/48/000000/contacts.png" alt="Contact">
-        <p>Contact</p>
-    </div>
-</section>
+</div>
 
-<!-- Pages -->
-<main>
-    <!-- Home Page -->
-    <section id="home" class="page">
-        <h2>Live Readings</h2>
-        <div class="readings-grid">
-            <div id="voltage" class="reading-box"><span>Voltage: --</span></div>
-            <div id="current" class="reading-box"><span>Current: --</span></div>
-            <div id="power" class="reading-box"><span>Power: --</span></div>
-            <div id="energy" class="reading-box"><span>Energy: --</span></div>
-            <div id="cost" class="reading-box cost"><span>Cost: --</span></div>
-            <div id="theft" class="reading-box theft"><span>Theft Detected: --</span></div>
-        </div>
-    </section>
-
-    <!-- Graph Page -->
-    <section id="graph" class="page" style="display:none;">
-        <h2>Energy Graph</h2>
-        <div class="graph-container">
-            <canvas id="chart"></canvas>
-        </div>
-    </section>
-
-    <!-- Contact Page -->
-    <section id="contact" class="page" style="display:none;">
-        <h2>Contact Government</h2>
-        <textarea id="contactMessage" placeholder="Write your message here..."></textarea>
-        <button id="sendMsg">Send</button>
-    </section>
-</main>
-
-<script src="dashboard.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
