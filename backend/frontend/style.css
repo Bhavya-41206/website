@@ -268,3 +268,45 @@ button#sendMsg { display: block; margin: 0 auto; padding: 10px 20px; border-radi
     100% { transform: scale(1); }
 }
 
+/* Full-screen graph container */
+.graph-container {
+    width: 95vw;
+    height: 80vh;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Graph page specific styling */
+#graph.page {
+    padding: 0;
+    margin: 0;
+}
+
+#graph h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+/* Make sure chart canvas takes full container */
+#chart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    .graph-container {
+        width: 100vw;
+        height: 70vh;
+        padding: 10px;
+        border-radius: 0;
+    }
+    
+    #graph.page {
+        padding: 10px;
+    }
+}
