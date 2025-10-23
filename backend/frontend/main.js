@@ -1,12 +1,14 @@
+// Theme toggle
 const toggleBtn = document.getElementById('toggleTheme');
 toggleBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark');
     document.body.classList.toggle('light');
 });
 
+// Login functionality
 document.getElementById('loginBtn').addEventListener('click', async () => {
     const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    const password = document.getElementById('password').
 
     // ✅ FIXED: Remove localhost, use relative path
     const res = await fetch('/api/login', {
@@ -23,3 +25,4 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
         document.getElementById('errorMsg').innerText = data.message;
     }
 });
+
