@@ -5,6 +5,14 @@ toggleBtn.addEventListener('click', () => {
     document.body.classList.toggle('light');
 });
 
+// Logout functionality
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = 'login.html';
+    }
+});
+
 // Page switching
 function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.style.display='none');
@@ -37,6 +45,11 @@ async function fetchReadings() {
         document.getElementById('current').querySelector('span').innerText = `Current: ${data.current} A`;
         document.getElementById('power').querySelector('span').innerText = `Power: ${data.power} W`;
         document.getElementById('energy').querySelector('span').innerText = `Energy: ${data.energy} Wh`;
+
+        // ✅ ADDED: Calculate and display cost (₹6.5 per kWh)
+        const energyKwh = data.energy / 1000; // Convert Wh to kWh
+        const cost = (energyKwh * 6.5).toFixed(2);
+        document.getElementById('cost').querySelector('span').innerText = `Cost: ₹${cost}`;
 
         const theftBox = document.getElementById('theft');
         theftBox.querySelector('span').innerText = `Theft Detected: ${data.theftDetected ? 'YES' : 'NO'}`;
@@ -78,4 +91,14 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
         alert("Message sent to Government!");
         document.querySelector('#contact textarea').value='';
     } else alert("Failed to send message.");
+});
+
+// Check authentication on page load
+window.addEventListener('load', function() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    
+    if (!isLoggedIn) {
+        window.location.href = 'login.html';
+        return;
+    }
 });
