@@ -1,8 +1,10 @@
-// Theme toggle
+// Theme toggle - moved to left
 const toggleBtn = document.getElementById('toggleTheme');
 toggleBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark');
     document.body.classList.toggle('light');
+    // Update button icon based on theme
+    toggleBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
 });
 
 // Logout functionality
@@ -13,10 +15,34 @@ document.getElementById('logoutBtn').addEventListener('click', function() {
     }
 });
 
+// Add tooltips to navigation cards
+document.querySelectorAll('.nav-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        const tooltip = this.querySelector('p').textContent;
+        this.setAttribute('title', tooltip);
+    });
+});
+
+// Add tooltip to theme toggle
+toggleBtn.addEventListener('mouseenter', function() {
+    this.setAttribute('title', 'Toggle Theme');
+});
+
+// Add tooltip to logout button
+document.getElementById('logoutBtn').addEventListener('mouseenter', function() {
+    this.setAttribute('title', 'Logout');
+});
+
 // Page switching
 function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.style.display='none');
     document.getElementById(id).style.display='block';
+    
+    // Update active nav card
+    document.querySelectorAll('.nav-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
 }
 
 // Show home on load
