@@ -30,7 +30,8 @@ let chart = new Chart(ctx, {
 // Fetch readings from backend
 async function fetchReadings() {
     try {
-        const res = await fetch('http://localhost:3000/api/readings');
+        // ✅ FIXED: Use relative path
+        const res = await fetch('/api/readings');
         const data = await res.json();
         document.getElementById('voltage').querySelector('span').innerText = `Voltage: ${data.voltage} V`;
         document.getElementById('current').querySelector('span').innerText = `Current: ${data.current} A`;
@@ -64,9 +65,14 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
     const message = document.querySelector('#contact textarea').value;
     const username = "User"; // Replace with logged-in username
     if(!message) return alert("Please write a message.");
-    const res = await fetch('http://localhost:3000/api/contact', {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username,message})
+    
+    // ✅ FIXED: Use relative path
+    const res = await fetch('/api/contact', {
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify({username,message})
     });
+    
     const data = await res.json();
     if(data.success){
         alert("Message sent to Government!");
