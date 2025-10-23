@@ -35,44 +35,71 @@ document.getElementById('logoutBtn').addEventListener('mouseenter', function() {
 
 // Page switching
 function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.style.display='none');
-    document.getElementById(id).style.display='block';
+    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
     
     // Update active nav card
     document.querySelectorAll('.nav-card').forEach(card => {
         card.classList.remove('active');
     });
+    // Find the clicked nav card and add active class
     event.currentTarget.classList.add('active');
 }
 
 // Show home on load
-window.onload = () => showPage('home');
+window.addEventListener('load', function() {
+    // Check authentication first
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    
+    if (!isLoggedIn) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    // Then show home page
+    showPage('home');
+    
+    // Initialize first nav card as active
+    document.querySelector('.nav-card').classList.add('active');
+});
 
 // Chart setup
 let ctx = document.getElementById('chart').getContext('2d');
 let chart = new Chart(ctx, {
     type: 'line',
-    data: { labels: [], datasets: [
-        { label: 'Voltage', data: [], borderColor: 'yellow', fill: false },
-        { label: 'Current', data: [], borderColor: 'blue', fill: false },
-        { label: 'Power', data: [], borderColor: 'green', fill: false },
-        { label: 'Energy', data: [], borderColor: 'orange', fill: false },
-    ]},
-    options: { responsive: true, interaction: { mode: 'index', intersect: false }, scales: { x: { display: true, title: { display: true, text: 'Time' } } } }
+    data: { 
+        labels: [], 
+        datasets: [
+            { label: 'Voltage', data: [], borderColor: 'yellow', fill: false },
+            { label: 'Current', data: [], borderColor: 'blue', fill: false },
+            { label: 'Power', data: [], borderColor: 'green', fill: false },
+            { label: 'Energy', data: [], borderColor: 'orange', fill: false },
+        ]
+    },
+    options: { 
+        responsive: true, 
+        interaction: { mode: 'index', intersect: false }, 
+        scales: { 
+            x: { 
+                display: true, 
+                title: { display: true, text: 'Time' } 
+            } 
+        } 
+    }
 });
 
 // Fetch readings from backend
 async function fetchReadings() {
     try {
-        // ✅ FIXED: Use relative path
         const res = await fetch('/api/readings');
         const data = await res.json();
+        
         document.getElementById('voltage').querySelector('span').innerText = `Voltage: ${data.voltage} V`;
         document.getElementById('current').querySelector('span').innerText = `Current: ${data.current} A`;
         document.getElementById('power').querySelector('span').innerText = `Power: ${data.power} W`;
         document.getElementById('energy').querySelector('span').innerText = `Energy: ${data.energy} Wh`;
 
-        // ✅ ADDED: Calculate and display cost (₹6.5 per kWh)
+        // Calculate and display cost (₹6.5 per kWh)
         const energyKwh = data.energy / 1000; // Convert Wh to kWh
         const cost = (energyKwh * 6.5).toFixed(2);
         document.getElementById('cost').querySelector('span').innerText = `Cost: ₹${cost}`;
@@ -85,7 +112,7 @@ async function fetchReadings() {
         const time = new Date().toLocaleTimeString();
         if(chart.data.labels.length > 10){
             chart.data.labels.shift();
-            chart.data.datasets.forEach(ds=>ds.data.shift());
+            chart.data.datasets.forEach(ds => ds.data.shift());
         }
         chart.data.labels.push(time);
         chart.data.datasets[0].data.push(data.voltage);
@@ -93,38 +120,41 @@ async function fetchReadings() {
         chart.data.datasets[2].data.push(data.power);
         chart.data.datasets[3].data.push(data.energy);
         chart.update();
-    } catch(err){ console.error(err); }
+    } catch(err) { 
+        console.error('Error fetching readings:', err); 
+    }
 }
 
+// Start fetching readings
 setInterval(fetchReadings, 3000);
 fetchReadings();
 
 // Contact form
 document.getElementById('sendMsg').addEventListener('click', async () => {
     const message = document.querySelector('#contact textarea').value;
-    const username = "User"; // Replace with logged-in username
-    if(!message) return alert("Please write a message.");
+    const username = "User";
     
-    // ✅ FIXED: Use relative path
-    const res = await fetch('/api/contact', {
-        method:'POST', 
-        headers:{'Content-Type':'application/json'}, 
-        body:JSON.stringify({username,message})
-    });
-    
-    const data = await res.json();
-    if(data.success){
-        alert("Message sent to Government!");
-        document.querySelector('#contact textarea').value='';
-    } else alert("Failed to send message.");
-});
-
-// Check authentication on page load
-window.addEventListener('load', function() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    
-    if (!isLoggedIn) {
-        window.location.href = 'login.html';
+    if(!message) {
+        alert("Please write a message.");
         return;
+    }
+    
+    try {
+        const res = await fetch('/api/contact', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ username, message })
+        });
+        
+        const data = await res.json();
+        if(data.success){
+            alert("Message sent to Government!");
+            document.querySelector('#contact textarea').value = '';
+        } else {
+            alert("Failed to send message.");
+        }
+    } catch(error) {
+        console.error('Error sending message:', error);
+        alert("Error sending message.");
     }
 });
